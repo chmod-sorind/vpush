@@ -15,7 +15,6 @@ class MainDialog(QDialog, AppMainWindow.Ui_AppMainWindow):
         self.connect(self.BT_openFile, SIGNAL("clicked()"), self.openFile)
         self.connect(self.BT_cmdSend, SIGNAL("clicked()"), self.telnetConn)
 
-
     def openFile(self):
         fileLocation = os.environ['USERPROFILE'] + '\\Desktop'
         try:
@@ -36,7 +35,7 @@ class MainDialog(QDialog, AppMainWindow.Ui_AppMainWindow):
         pollingCount = self.SB_pollCount.value()
         telnetPort = self.TxB_telnetPort.text()
         command = self.TxB_telnetCommand.text()
-        for n in range(1,  pollingCount + 1):
+        for n in range(1, pollingCount + 1):
             for f in self.LV_hostList.items():
                 try:
                     telnet = telnetlib.Telnet(f, telnetPort)
@@ -44,8 +43,6 @@ class MainDialog(QDialog, AppMainWindow.Ui_AppMainWindow):
                     telnet.close()
                 except:
                     pass
-
-
 
 
 app = QApplication(sys.argv)
