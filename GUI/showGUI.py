@@ -36,7 +36,7 @@ class MainDialog(QDialog, AppMainWindow.Ui_AppMainWindow):
         telnetPort = self.TxB_telnetPort.text()
         command = self.TxB_telnetCommand.text()
         for n in range(1, pollingCount + 1):
-            for f in self.LV_hostList.items():
+            for f in self.LV_hostList.items():  # Here is the problem
                 try:
                     telnet = telnetlib.Telnet(f, telnetPort)
                     telnet.write(command)
