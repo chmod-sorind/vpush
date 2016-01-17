@@ -8,7 +8,7 @@ import telnetlib
 import time
 
 
-class MainDialog(QDialog, AppMainWindow.Ui_AppMainWindow):
+class MainDialog(QMainWindow, QDialog, AppMainWindow.Ui_AppMainWindow):
     def __init__(self, parent=None):
         super(MainDialog, self).__init__(parent)
         self.setupUi(self)
@@ -17,19 +17,20 @@ class MainDialog(QDialog, AppMainWindow.Ui_AppMainWindow):
 
     def openFile(self):
         fileLocation = os.environ['USERPROFILE'] + '\\Desktop'
-        try:
-            fileName = str(QFileDialog.getOpenFileName(None, 'Select Host List', fileLocation,
-                                                       'File Filter (*.txt *.ini)')[0])
-            with open(fileName) as IP:
-                line = IP.read().splitlines()
-            model = QStandardItemModel(self.LV_hostList)
-            for ip in line:
-                host_item = QStandardItem(ip)
-                host_item.setCheckable(True)
-                model.appendRow(host_item)
-            self.LV_hostList.setModel(model)
-        except:
-            pass
+        #try:
+        fileName = str(QFileDialog.getOpenFileName(None, 'Select Host List', fileLocation,
+                                                   'File Filter (*.txt *.ini)')[0])
+        with open(fileName) as IP:
+            line = IP.read().splitlines()
+        model = QStandardItemModel(self.LV_hostList)
+        for ip in line:
+            host_item = QStandardItem(ip)
+            host_item.setCheckable(True)
+            host_item.setEditable(False)
+            model.appendRow(host_item)
+        self.LV_hostList.setModel(model)
+        #except:
+            #pass
 
     def telnetConn(self):
         pollingCount = self.SB_pollCount.value()
