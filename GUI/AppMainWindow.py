@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'AppMainWindow_V1.2-1.ui'
-#
-# Created: Sat Jan 16 20:35:10 2016
-#      by: pyside-uic 0.2.15 running on PySide 1.2.4
-#
-# WARNING! All changes made in this file will be lost!
-
 from PySide import QtCore, QtGui
 
 class Ui_AppMainWindow(object):
@@ -86,7 +77,7 @@ class Ui_AppMainWindow(object):
         self.SB_pollCount.setMaximumSize(QtCore.QSize(62, 22))
         self.SB_pollCount.setProperty("value", 1)
         self.SB_pollCount.setObjectName("SB_pollCount")
-        #self.SB_pollCount.setEnabled(False)
+        self.SB_pollCount.setEnabled(False)
         self.horizontalLayout.addWidget(self.SB_pollCount)
         self.label = QtGui.QLabel(self.centralWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -109,7 +100,7 @@ class Ui_AppMainWindow(object):
         self.SB_pollInterval.setMaximumSize(QtCore.QSize(62, 22))
         self.SB_pollInterval.setProperty("value", 1)
         self.SB_pollInterval.setObjectName("SB_pollInterval")
-        #self.SB_pollInterval.setEnabled(False)
+        self.SB_pollInterval.setEnabled(False)
         self.horizontalLayout_2.addWidget(self.SB_pollInterval)
         self.label_2 = QtGui.QLabel(self.centralWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
