@@ -24,7 +24,7 @@ for pollNum in range(1, pollingCount + 1):
             if '#' not in f:
                 #command = str('vpush')
                 telnet = telnetlib.Telnet(f, 2323)
-                telnet.write(('vpush' + "\n").encode('ascii'))
+                telnet.write(('vpush' + '\n').encode('ascii'))
                 telnet.close()
                 print('Vpush#:', pollNum, f, 'Done!')
             else:
