@@ -13,5 +13,5 @@ parser.add_argument('--ip', '-t', action='store_true', help='Specify one target 
 parser.add_argument('--file', '-f', action='store_true', help='Specify a file that contains a list of IPs (one IP per row).')
 parser.add_argument('--frequency', '-fq', action='store_true', help='Specify the frequency of the poll in seconds. Default value is 30.')
 parser.add_argument('--count', '-c', action='store_true', help='Specify the number of repetitions. Default value is 1.')
-parser.add_argument('--version', action='version', version='%(prog)s 2.0')
+parser.add_argument('--version', action='version', version='%(prog)s 1.0')
 args = parser.parse_args()
