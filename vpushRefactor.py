@@ -49,21 +49,29 @@ if __name__ == '__main__':
             else:
                 sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
+    # First check if  all the necessary options were passed to the script or passed multiple times.
+
+    if args.port is None and args.bsp is False and args.bses is False:
+        print("Please choose at least one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
+        quit(print('Script failed...'))
+
+    if args.bsp is True and args.bses is True:
+        print("You specified too many options for the destination port (--bsp AND --bses).\n"
+              "Please choose only one option for target port (--bsp OR --bses)")
+        quit(print('Script failed...'))
+
     if args.port is not None and args.bsp is True and args.bses is True:
         print("You specified way too many options for the destination port (--port/-p AND --bsp AND --bses).\n"
               "Please choose only one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
         quit(print('Script will now exit.'))
-    elif args.port is None and args.bsp is False and args.bses is False:
-        TARGET_HOST_PORT = PORT_NUMBER_LIST[1]
-        print('\t\t\t**** WARNING! ****\nThe default bsp[{1}] port will be used since no other option was specified.\n'
-              .format(PORT_NUMBER_LIST[0], PORT_NUMBER_LIST[1]))
-    elif args.port is not None and args.bsp is True:
+
+    if args.port is not None and args.bsp is True:
         answer_BSP = query_yes_no\
             ("You specified too many options for the destination port (--port/-p AND --bsp).\n"
              "YES, to continue with the default value set by --port/-p option:[{0}].\n"
              "NO, to quit the script.".format(args.port))
         if answer_BSP is False:
-            quit(print('Script will now exit.'))
+            quit(print('Script killed by user.'))
         else:
             TARGET_HOST_PORT = args.port
     elif args.port is not None and args.bses is True:
@@ -72,13 +80,9 @@ if __name__ == '__main__':
              "YES, to continue with the default value set by --port/-p option:[{0}].\n"
              "NO, to quit the script.".format(args.port))
         if answer_BSES is False:
-            quit(print('Script will now exit.'))
+            quit(print('Script killed by user.'))
         else:
             TARGET_HOST_PORT = args.port
-    elif args.bsp is True and args.bses is True:
-        print("You specified too many options for the destination port (--bsp AND --bses).\n"
-              "Please choose only one option for target port (--bsp OR --bses)")
-        quit(print('Script will now exit.'))
     elif args.port is not None:
         TARGET_HOST_PORT = args.port
     elif args.bsp is True:
