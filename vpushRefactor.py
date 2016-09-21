@@ -55,7 +55,7 @@ if __name__ == '__main__':
         quit(print('Script will now exit.'))
     elif args.port is None and args.bsp is False and args.bses is False:
         TARGET_HOST_PORT = PORT_NUMBER_LIST[1]
-        print('\t\t\t**** WARNING! ****\nDefault bsp[{1}] port will be used since no other option was specified.\n'
+        print('\t\t\t**** WARNING! ****\nThe default bsp[{1}] port will be used since no other option was specified.\n'
               .format(PORT_NUMBER_LIST[0], PORT_NUMBER_LIST[1]))
     elif args.port is not None and args.bsp is True:
         answer_BSP = query_yes_no\
