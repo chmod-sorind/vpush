@@ -4,48 +4,94 @@ import time
 import sys
 
 
-PORT_NUMBER = (2322, 2323)
+PORT_NUMBER_LIST = (2322, 2323)
 TARGET_HOST_IP = []
+TARGET_HOST_PORT=''
+VERSION = "0.2.0"
+'''
+V 0.2.0
+Store the correct argument type for each option.
+Resolve conflicts when setting the TARGET_HOST_PORT port.
+'''
 
 parser = argparse.ArgumentParser(description='Send a command via telnet connection to BroadSign Player/Edge Server.')
 parser.add_argument('command', metavar='COMMAND', type=str, nargs='?', default='vpush', help='Command you want to send to the target IP via telnet connection. Default command is notorious vpush.')
 parser.add_argument('--bsp',  action='store_true', help='Push a poll on a BroadSign Player on port 2323 by default.')
 parser.add_argument('--bses', action='store_true', help='Push a poll on a BroadSign Edge Server on port 2324 by default.')
-parser.add_argument('--port', '-p', action='store', type=int, help="Specify a different port for the telnet connection (default: bsp[{1}], bses[{0}]).".format(PORT_NUMBER[0], PORT_NUMBER[1]))
-
-parser.add_argument('--ip', '-t', nargs='?', help='Specify one target IP or a list of IPs in a comma separated list.')
+parser.add_argument('--port', '-p', action='store', type=int, help="Specify a different port for the telnet connection (default: bsp[{1}], bses[{0}]).".format(PORT_NUMBER_LIST[0], PORT_NUMBER_LIST[1]))
+parser.add_argument('--ip', '-t', nargs='+', help='Specify one target IP or a list of IPs in a comma separated list.')
 parser.add_argument('--file', '-f', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help='Specify a file that contains a list of IPs (one IP per row).')
-parser.add_argument('--frequency', '-fq', type=str, nargs=1, default=1, help='Specify the frequency of the poll in seconds. Default value is 30.')
-parser.add_argument('--count', '-c', nargs=1, default=1, help='Specify the number of repetitions. Default value is 1.')
-parser.add_argument('--version', '-v', action='version', version='%(prog)s 1.0')
+parser.add_argument('--frequency', '-fq', default=1, type=float, help='Specify the frequency of the poll in seconds. Default value is 30.')
+parser.add_argument('--count', '-c', default=1, type=int, help='Specify the number of repetitions. Default value is 1.')
+parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + VERSION)
 args = parser.parse_args()
 
 if __name__ == '__main__':
 
-    if args.port is None:
-        if args.bses is True:
-            args.port = PORT_NUMBER[0]
-        elif args.bsp is True:
-            args.port = PORT_NUMBER[1]
-        elif args.port is None and args.bsp is False and args.bses is False:
-            print('You have to choose at lease one option for the port. I.E.: --bsp, --bses, --port/-p [PORT_NUMBER]')
-            quit()
+    def query_yes_no(question, default="yes"):
+        valid = {"yes": True, "y": True, "ye": True,
+                 "no": False, "n": False}
+        if default is None:
+            prompt = " [y/n] "
+        elif default == "yes":
+            prompt = " [Y/n] "
+        elif default == "no":
+            prompt = " [y/N] "
+        else:
+            raise ValueError("invalid default answer: '%s'" % default)
+        while True:
+            sys.stdout.write(question + prompt)
+            choice = input().lower()
+            if default is not None and choice == '':
+                return valid[default]
+            elif choice in valid:
+                return valid[choice]
+            else:
+                sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
-    print(args.ip)
+    if args.port is not None and args.bsp is True and args.bses is True:
+        print("You specified way too many options for the destination port (--port/-p AND --bsp AND --bses).\n"
+              "Please choose only one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
+        quit(print('Script will now exit.'))
+    elif args.port is None and args.bsp is False and args.bses is False:
+        TARGET_HOST_PORT = PORT_NUMBER_LIST[1]
+        print('\t\t\t**** WARNING! ****\nDefault bsp[{1}] port will be used since no other option was specified.\n'
+              .format(PORT_NUMBER_LIST[0], PORT_NUMBER_LIST[1]))
+    elif args.port is not None and args.bsp is True:
+        answer_BSP = query_yes_no\
+            ("You specified too many options for the destination port (--port/-p AND --bsp).\n"
+             "YES, to continue with the default value set by --port/-p option:[{0}].\n"
+             "NO, to quit the script.".format(args.port))
+        if answer_BSP is False:
+            quit(print('Script will now exit.'))
+        else:
+            TARGET_HOST_PORT = args.port
+    elif args.port is not None and args.bses is True:
+        answer_BSES = query_yes_no\
+            ("You specified too many options for the destination port (--port/-p AND --bses).\n"
+             "YES, to continue with the default value set by --port/-p option:[{0}].\n"
+             "NO, to quit the script.".format(args.port))
+        if answer_BSES is False:
+            quit(print('Script will now exit.'))
+        else:
+            TARGET_HOST_PORT = args.port
+    elif args.bsp is True and args.bses is True:
+        print("You specified too many options for the destination port (--bsp AND --bses).\n"
+              "Please choose only one option for target port (--bsp OR --bses)")
+        quit(print('Script will now exit.'))
+    elif args.port is not None:
+        TARGET_HOST_PORT = args.port
+    elif args.bsp is True:
+        TARGET_HOST_PORT = PORT_NUMBER_LIST[1]
+    elif args.bses is True:
+        TARGET_HOST_PORT = PORT_NUMBER_LIST[0]
 
-    print(args)
-
-
-
-''' some tests. will be removed when I'm done.
-#print('port type is: ', type(args.port))
-#pollFreq = args.frequency
-#pollFreq = map(float, pollFreq)
-#print(type(pollFreq))
-#print(pollFreq)
-
-
-#def setFreqAndCount(pollFreq, pollCount):
-#    pollFreq = args.frequency
-#    pollCount = args.count
-END some tests '''
+    print('bsp value: ', args.bsp)
+    print('bses value: ', args.bses)
+    print('port value: ', args.port)
+    print('target port number is: ', TARGET_HOST_PORT)
+    print('ip value: ', args.ip)
+    print('file value: ', args.file)
+    print('count value: ', args.count)
+    print('frequency value: ', args.frequency)
+    print('command value: ', args.command)
