@@ -104,3 +104,4 @@ if __name__ == '__main__':
     def do_telnet(TARGET_IP, TARGET_PORT, POLLING_COUNT, POLLING_FREQUENCY, COMMAND):
 
         return
+
