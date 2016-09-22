@@ -6,7 +6,9 @@ import sys
 
 PORT_NUMBER_LIST = (2322, 2323)
 TARGET_HOST_IP = []
-TARGET_HOST_PORT=''
+TARGET_HOST_PORT = ''
+POLLING_COUNT = ''
+POLLING_RATE = ''
 VERSION = "0.2.0"
 '''
 V 0.2.0
@@ -51,19 +53,23 @@ if __name__ == '__main__':
 
     # First check if  all the necessary options were passed to the script or passed multiple times.
 
+    if args.ip is None and "<stdin>" in args.file:  # Something is wrong here. The script hangs here. Debug this.
+        print("Please choose at least one option for target ip (--ip/-t [IP] OR --file/-f [FILE])")
+        quit(print("Script failed.."))
+
     if args.port is None and args.bsp is False and args.bses is False:
         print("Please choose at least one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
-        quit(print('Script failed...'))
+        quit(print("Script failed..."))
 
     if args.bsp is True and args.bses is True:
         print("You specified too many options for the destination port (--bsp AND --bses).\n"
               "Please choose only one option for target port (--bsp OR --bses)")
-        quit(print('Script failed...'))
+        quit(print("Script failed..."))
 
     if args.port is not None and args.bsp is True and args.bses is True:
         print("You specified way too many options for the destination port (--port/-p AND --bsp AND --bses).\n"
               "Please choose only one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
-        quit(print('Script will now exit.'))
+        quit(print("Script will now exit."))
 
     if args.port is not None and args.bsp is True:
         answer_BSP = query_yes_no\
@@ -101,7 +107,7 @@ if __name__ == '__main__':
     print('command value: ', args.command)
 
 
-    def do_telnet(TARGET_IP, TARGET_PORT, POLLING_COUNT, POLLING_FREQUENCY, COMMAND):
+    def do_telnet(TARGET_HOST_IP, TARGET_HOST_PORT, POLLING_COUNT, POLLING_RATE, COMMAND):
 
         return
 
