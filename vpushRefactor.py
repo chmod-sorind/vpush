@@ -99,3 +99,8 @@ if __name__ == '__main__':
     print('count value: ', args.count)
     print('frequency value: ', args.frequency)
     print('command value: ', args.command)
+
+
+    def do_telnet(TARGET_IP, TARGET_PORT, POLLING_COUNT, POLLING_FREQUENCY, COMMAND):
+
+        return
