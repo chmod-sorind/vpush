@@ -9,6 +9,7 @@ TARGET_HOST_IP = []
 TARGET_HOST_PORT = ''
 POLLING_COUNT = ''
 POLLING_RATE = ''
+IP_FILE = ''
 VERSION = "0.2.0"
 '''
 V 0.2.0
@@ -22,7 +23,7 @@ parser.add_argument('--bsp',  action='store_true', help='Push a poll on a BroadS
 parser.add_argument('--bses', action='store_true', help='Push a poll on a BroadSign Edge Server on port 2324 by default.')
 parser.add_argument('--port', '-p', action='store', type=int, help="Specify a different port for the telnet connection (default: bsp[{1}], bses[{0}]).".format(PORT_NUMBER_LIST[0], PORT_NUMBER_LIST[1]))
 parser.add_argument('--ip', '-t', nargs='+', help='Specify one target IP or a list of IPs in a comma separated list.')
-parser.add_argument('--file', '-f', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help='Specify a file that contains a list of IPs (one IP per row).')
+parser.add_argument('--file', '-f', nargs='?', help='Specify a file that contains a list of IPs (one IP per row).')  # type=argparse.FileType('r'), default=sys.stdin
 parser.add_argument('--frequency', '-fq', default=1, type=float, help='Specify the frequency of the poll in seconds. Default value is 30.')
 parser.add_argument('--count', '-c', default=1, type=int, help='Specify the number of repetitions. Default value is 1.')
 parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + VERSION)
@@ -53,22 +54,24 @@ if __name__ == '__main__':
 
     # First check if  all the necessary options were passed to the script or passed multiple times.
 
-    if args.ip is None and "<stdin>" in args.file:  # Something is wrong here. The script hangs here. Debug this.
-        print("Please choose at least one option for target ip (--ip/-t [IP] OR --file/-f [FILE])")
+    if args.file is None:
+        print("Please select at least one option for target ip (--ip/-t [IP] OR --file/-f [FILE])")
         quit(print("Script failed.."))
+    else:
+        IP_FILE = args.file
 
     if args.port is None and args.bsp is False and args.bses is False:
-        print("Please choose at least one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
+        print("Please select at least one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
         quit(print("Script failed..."))
 
     if args.bsp is True and args.bses is True:
         print("You specified too many options for the destination port (--bsp AND --bses).\n"
-              "Please choose only one option for target port (--bsp OR --bses)")
+              "Please select only one option for target port (--bsp OR --bses)")
         quit(print("Script failed..."))
 
     if args.port is not None and args.bsp is True and args.bses is True:
         print("You specified way too many options for the destination port (--port/-p AND --bsp AND --bses).\n"
-              "Please choose only one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
+              "Please select only one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
         quit(print("Script will now exit."))
 
     if args.port is not None and args.bsp is True:
@@ -96,12 +99,9 @@ if __name__ == '__main__':
     elif args.bses is True:
         TARGET_HOST_PORT = PORT_NUMBER_LIST[0]
 
-    print('bsp value: ', args.bsp)
-    print('bses value: ', args.bses)
-    print('port value: ', args.port)
     print('target port number is: ', TARGET_HOST_PORT)
     print('ip value: ', args.ip)
-    print('file value: ', args.file)
+    print('file value: ', IP_FILE)
     print('count value: ', args.count)
     print('frequency value: ', args.frequency)
     print('command value: ', args.command)
