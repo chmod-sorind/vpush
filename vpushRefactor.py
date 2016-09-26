@@ -52,7 +52,7 @@ if __name__ == '__main__':
             elif choice in valid:
                 return valid[choice]
             else:
-                sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+                sys.stdout.write("Please respond with 'port', 'bsp' or 'bses'.\n")
 
     # First check if  all the necessary options were passed to the script or passed multiple times.
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
         quit(print("Script failed.."))
 
     if args.file is not None and args.ip is not None:
-        print("Oops... You specified too many options for the target ip ( --ip AND --file).\n"
+        print("You specified too many options for the target ip ( --ip AND --file).\n"
               "Please select only one option for target ip (--ip/-t [IP] OR --file/-f [FILE])")
         quit(print("Script failed..."))
 
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         quit(print("Script failed..."))
 
     if args.bsp is True and args.bses is True:
-        print("Oops.. You specified too many options for the destination port (--bsp AND --bses).\n"
+        print("You specified too many options for the destination port (--bsp AND --bses).\n"
               "Please select only one option for target port (--bsp OR --bses)")
         quit(print("Script failed..."))
 
