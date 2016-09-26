@@ -4,7 +4,7 @@ import logging
 import socket
 import select
 
-HOSTNAME = '10.10.10.8'  # Local IP address. localhost/127.0.0.1 will Bind socket to local host and port, meaning you can only connect to telnet server form localhost.
+HOSTNAME = ''  # Local IP address. localhost/127.0.0.1 will Bind socket to local host and port, meaning you can only connect to telnet server form localhost.
 PORT = '4000'
 
 MAXIMUM_QUEUED_CONNECTIONS = 5
@@ -63,10 +63,11 @@ def start_server(hostname, port):
                         client_address[1]
                     ))
                 else:
-                    message = ready_socket.recv(RECEIVING_BUFFER_SIZE)
-                    if message:
-
-                        print("Message from [%s:%d]" % (client_address[0], client_address[1]), str(message.strip(), 'UTF-8'))
+                    data = ready_socket.recv(RECEIVING_BUFFER_SIZE)
+                    if data:
+                        message = str(data.strip(), 'UTF-8')
+                        if message:
+                            print("Message from [%s:%d]" % (client_address[0], client_address[1]), message)
                         # Client send correct message. Echo it.
                         # ready_socket.sendall(message) # If you want to echo message back to client uncomment this line.
                     else:

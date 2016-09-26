@@ -31,13 +31,14 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
 
-    def query_yes_no(question, default="yes"):
-        valid = {"yes": True, "y": True, "ye": True,
-                 "no": False, "n": False, "bsp": False}  # try to change yes/no query
+    def query_yes_no(question, default="port"):
+        valid = {"yes": True, "y": True, "ye": True, "port": True, "por": True, "po": True, "p": True,
+                 "no": False, "n": False, "bsp": False, "bses": False, "bse": False, "bs": False, "b": False}
         if default is None:
-            prompt = " [y/n] "
-        elif default == "yes":
-            prompt = " [Y/n] "
+            print("Sorry need an answer...")
+            prompt = " [port/bsp/bses] "
+        elif default == "port":
+            prompt = " [port/bsp/bses] "
         elif default == "no":
             prompt = " [y/N] "
         else:
@@ -87,20 +88,20 @@ if __name__ == '__main__':
 
     if args.port is not None and args.bsp is True:
         answer_BSP = query_yes_no\
-            ("Oops... You specified too many options for the destination port (--port/-p AND --bsp).\n"
-             "YES, to continue with the default value set by --port/-p option:[{0}].\n"
-             "NO, to quit the script.".format(args.port))
+            ("You specified too many options for the destination port (--port/-p AND --bsp).\n"
+             "Type port to continue with the value set by --port/-p option:[{0}].\n"
+             "Type bsp continue with the default value for bsp[2323].".format(args.port))
         if answer_BSP is False:
-            quit(print('Script killed by user.'))
+            TARGET_HOST_PORT = PORT_NUMBER_LIST[1]
         else:
             TARGET_HOST_PORT = args.port
     elif args.port is not None and args.bses is True:
         answer_BSES = query_yes_no\
-            ("Oops... You specified too many options for the destination port (--port/-p AND --bses).\n"
-             "YES, to continue with the default value set by --port/-p option:[{0}].\n"
-             "NO, to quit the script.".format(args.port))
+            ("You specified too many options for the destination port (--port/-p AND --bses).\n"
+             "Type port to continue with the value set by --port/-p option:[{0}].\n"
+             "Type bses to continue with default value for bses[2322].".format(args.port))
         if answer_BSES is False:
-            quit(print('Script killed by user.'))
+            TARGET_HOST_PORT = PORT_NUMBER_LIST[0]
         else:
             TARGET_HOST_PORT = args.port
     elif args.port is not None:
@@ -115,7 +116,7 @@ if __name__ == '__main__':
     print('file value: ', args.file)
     print('count value: ', args.count)
     print('frequency value: ', args.frequency)
-    print('command value: ', args.command)
+    print('command value: ', COMMAND)
 
 
     def do_telnet(TARGET_HOST_IP, TARGET_HOST_PORT, POLLING_COUNT, POLLING_RATE, COMMAND):
