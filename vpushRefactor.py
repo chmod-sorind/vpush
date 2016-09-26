@@ -9,11 +9,12 @@ TARGET_HOST_PORT = ''
 POLLING_COUNT = ''
 POLLING_RATE = ''
 VERSION = "0.2.0"
+
 '''
 V 0.2.0
 Store the correct argument type for each option.
 Resolve conflicts when setting the TARGET_HOST_PORT port.
-Chenged the way the argument for input files is set.
+Changed the way the argument for input files is set.
 Added a check for --file/-f.
 '''
 
