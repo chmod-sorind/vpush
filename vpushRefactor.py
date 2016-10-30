@@ -5,9 +5,9 @@ import sys
 
 PORT_NUMBER_LIST = (2322, 2323)
 TARGET_HOST_IP = []
-TARGET_HOST_PORT = ''
-POLLING_COUNT = ''
-POLLING_RATE = ''
+#TARGET_HOST_PORT = ""
+#POLLING_COUNT = ''
+#POLLING_RATE = ''
 VERSION = "0.2.1"
 
 # ToDo: Build get_frequency function to return FREQUENCY. It should take 2 arguments (frequency, default) which will use args.frequency.
@@ -93,7 +93,6 @@ if __name__ == '__main__':
         return TARGET_HOST_IP
 
     a = get_target_host_ip(args.ip, args.file)  # Control Line
-    print(a)  # Control Line
 
 
     def get_target_host_port(port, bsp, bses):  # Do a check on port/bsp/bses options and make the user pick only one.
@@ -142,26 +141,42 @@ if __name__ == '__main__':
         return TARGET_HOST_PORT
 
     b = get_target_host_port(args.port, args.bsp, args.bses)  # Control Line
-    print(b)  # Control Line
 
-    def get_frequency(frequency, default):
-
+    def get_frequency(frequency):
+        POLLING_RATE = frequency
         return POLLING_RATE
 
-    def get_count(count, default):
+    c = get_frequency(args.frequency)
 
+    def get_count(count):
+        POLLING_COUNT = count
         return POLLING_COUNT
 
+    d = get_count(args.count)
 
-    print('target port number is: ', TARGET_HOST_PORT)  # Control Line
-    print('ip value: ', TARGET_HOST_IP)  # Control Line
-    if args.file is not None:
-        print('file value: ', args.file.name)  # Control Line
-    print('count value: ', args.count)  # Control Line
-    print('frequency value: ', args.frequency)  # Control Line
-    print('command value: ', "COMMAND")  # Control Line
+    def get_command(command):
+        COMMAND = command
+        return COMMAND
+
+    e = get_command(args.command)
 
 
-    def do_telnet(TARGET_HOST_IP, TARGET_HOST_PORT, POLLING_COUNT, POLLING_RATE, COMMAND):
 
-        return
+    def do_telnet(hosts, port, pollCount, pollRate, command):
+        for i in range(1, pollCount + 1):
+            for ip in hosts:
+                #try:
+                telnet = telnetlib.Telnet(ip, port)
+                telnet.write((command + '\n').encode('UTF-8'))
+                telnet.close()
+                print("Command sent to %s" % ip)
+                #except:
+                    #print("Could not connect to host: %s" % ip)
+            if i < pollCount:
+                for item in range(1, int(pollRate) + 1):
+                    print(item, end=" ")
+                #print("Sleeping %d" % pollRate)
+                #time.sleep(pollRate)
+        return 0
+
+    do_telnet(a, b, d, c, e)
