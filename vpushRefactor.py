@@ -130,7 +130,7 @@ def get_target_host_port(port, bsp, bses):  # Do a check on port/bsp/bses option
         target_host_port = PORT_NUMBER_LIST[1]
     elif bses is True:
         target_host_port = PORT_NUMBER_LIST[0]
-    return target_host_port  # Not sure how to fix this.
+    return target_host_port  # Not sure how to fix this (Message: "Local Variable (#) might be referenced before assignment.").
 
 
 def get_frequency(frequency):
