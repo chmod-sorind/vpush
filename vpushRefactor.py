@@ -149,16 +149,22 @@ def run_telnet_connection(hosts, port, poll_rate, poll_count, command):
     for pollNum in range(1, poll_count + 1):
         for ip in hosts:
             try:
-                telnet = telnetlib.Telnet(ip, port, timeout=2)
+                telnet = telnetlib.Telnet(ip, port)
                 telnet.write((command + '\n').encode('UTF-8'))
                 telnet.close()
-                print("#%s Command %s sent to %s" % (pollNum, command, ip))
-            except:
-                print("Could not connect to host: %s" % ip)
+                print("#{0} Command {1} sent to {2}".format(pollNum, command, ip))
+            except Exception as e:
+                print(e)
+                #print("Could not connect to host: {}".format(ip))
         if pollNum < poll_count:
-            print("Sleeping for %s seconds" % poll_rate)
-
-            time.sleep(poll_rate)
+            pollrate = int(poll_rate)
+            print("Sleeping for {} seconds".format(pollrate))
+            while pollrate > -1:
+                mins, secs = divmod(int(pollrate), 60)
+                timeformat = '{:02d}:{:02d}'.format(mins, secs)
+                print(timeformat, end='\r')
+                time.sleep(1)
+                pollrate -= 1
     return 0
 
 run_telnet_connection(get_target_host_ip(args.ip, args.file),
