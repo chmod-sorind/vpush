@@ -5,16 +5,7 @@ import sys
 
 PORT_NUMBER_LIST = (2322, 2323)
 TARGET_HOST_IP = []
-#TARGET_HOST_PORT = ""
-#POLLING_COUNT = ''
-#POLLING_RATE = ''
-VERSION = "0.2.1"
-
-# ToDo: Build get_frequency function to return FREQUENCY. It should take 2 arguments (frequency, default) which will use args.frequency.
-# ToDo: Build get_count function to return COUNT. It should take 2 arguments (frequency, default) which will use args.count.
-# ToDo: Build the do_telnet function. It should take 5 arguments (TARGET_HOST_IP, TARGET_HOST_PORT, POLLING_COUNT, POLLING_RATE, COMMAND) which will use the returns from all the other functions.
-# ToDo: Remove or comment-out all lines with # Control Line.
-
+VERSION = "0.2.3"
 
 '''
 V 0.2.0
@@ -30,6 +21,9 @@ Build the function get_target_host_ip to get the target ip/ips from option --fil
 
 V 0.2.2
 Build get_target_host_port function to return TARGET_HOST_PORT. It should take 3 arguments (port, bsp, bses) which will use args.port, args.bsp and args.bses.
+
+V 0.2.3
+
 '''
 
 parser = argparse.ArgumentParser(description='Send a command via telnet connection to BroadSign Player/Edge Server.')
@@ -44,139 +38,131 @@ parser.add_argument('--count', '-c', default=1, type=int, help='Specify the numb
 parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + VERSION)
 args = parser.parse_args()
 
-if __name__ == '__main__':
 
-    def get_answer(question, default=""):
-        valid = {"port", "bsp", "bses", "file", "ip"}
-        if default == "port/bsp":
-            prompt = " [port/bsp] "
-        elif default == "port/bses":
-            prompt = " [port/bses] "
-        elif default == "bsp/bses":
-            prompt = " [bsp/bses] "
-        elif default == "ip/file":
-            prompt = " [file/ip] "
-        while True:
-            sys.stdout.write(question + prompt)
-            choice = input().lower()
-            if default is not None and choice == '':
-                print("\nSorry need an answer... Invalid answer for: '%s'" % default)
-            elif choice in valid:
-                return choice
+def get_answer(question, default=""):
+    valid = {"port", "bsp", "bses", "file", "ip"}
+    if default == "port/bsp":
+        prompt = " [port/bsp] "
+    elif default == "port/bses":
+        prompt = " [port/bses] "
+    elif default == "bsp/bses":
+        prompt = " [bsp/bses] "
+    elif default == "ip/file":
+        prompt = " [file/ip] "
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+        if default is not None and choice == '':
+            print("\nSorry need an answer... Invalid answer for: '%s'" % default)
+        elif choice in valid:
+            return choice
 
-    # First check if  all the necessary options were passed to the script or passed multiple times.
+# First check if  all the necessary options were passed to the script or passed multiple times.
 
-    def get_target_host_ip(ip, file):  # Do a check on ip/file options and make the user pick only one.
-        if file is None and ip is None:
-            print("Please select at least one option for target ip (--ip/-t [IP] OR --file/-f [FILE])")
-            quit(print("Script failed.."))
-        elif file is not None and ip is not None:
-            answer_ip = get_answer\
-                ("You specified too many options for the target ip ( --ip AND --file).\n"
-                 "Type file to continue targeting hosts specified in file[{0}].\n"
-                 "Type ip to continue targeting hosts specified list by --ip/-t {1}".
-                 format(file.name, ip), default="ip/file")
-            if answer_ip == "ip":
-                for i in ip:
-                    TARGET_HOST_IP.append(i)
-            elif answer_ip == "file":
-                for i in file.readlines():
-                    line_ip = i.rstrip()
-                    TARGET_HOST_IP.append(line_ip)
-        elif ip is not None:
+
+def get_target_host_ip(ip, file):  # Do a check on ip/file options and make the user pick only one.
+    if file is None and ip is None:
+        print("Please select at least one option for target ip (--ip/-t [IP] OR --file/-f [FILE])")
+        quit(print("Script failed.."))
+    elif file is not None and ip is not None:
+        answer_ip = get_answer\
+            ("You specified too many options for the target ip ( --ip AND --file).\n"
+             "Type file to continue targeting hosts specified in file[{0}].\n"
+             "Type ip to continue targeting hosts specified list by --ip/-t {1}".
+             format(file.name, ip), default="ip/file")
+        if answer_ip == "ip":
             for i in ip:
                 TARGET_HOST_IP.append(i)
-        elif file is not None:
+        elif answer_ip == "file":
             for i in file.readlines():
                 line_ip = i.rstrip()
                 TARGET_HOST_IP.append(line_ip)
-        return TARGET_HOST_IP
-
-    a = get_target_host_ip(args.ip, args.file)  # Control Line
-
-
-    def get_target_host_port(port, bsp, bses):  # Do a check on port/bsp/bses options and make the user pick only one.
-        if port is None and bsp is False and bses is False:
-            print("Please select at least one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
-            quit(print("Script failed..."))
-        elif bsp is True and bses is True:
-            answer_bsp_bses = get_answer\
-                ("\nYou specified too many options for the destination port (--bsp AND --bses).\n"
-                 "Type bsp to continue with the value set by --bsp[2323]"
-                 "Type bses to continue with the value set by --bses[2322]", default="bsp/bses")
-            if answer_bsp_bses == "bsp":
-                TARGET_HOST_PORT = PORT_NUMBER_LIST[1]
-            elif answer_bsp_bses == "bses":
-                TARGET_HOST_PORT = PORT_NUMBER_LIST[0]
-        elif port is not None and bsp is True and bses is True:
-            print("\nYou specified way too many options for the destination port (--port/-p AND --bsp AND --bses).\n"
-                  "Please select only one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
-            quit(print("Script will now exit."))
-        elif port is not None and bsp is True:
-            answer_port_bsp = get_answer\
-                ("\nYou specified too many options for the destination port (--port/-p AND --bsp).\n"
-                 "Type port to continue with the value set by --port/-p option:[{0}].\n"
-                 "Type bsp to continue with the default value for bsp[2323].".
-                 format(port), default="port/bsp")
-            if answer_port_bsp == "bsp":
-                TARGET_HOST_PORT = PORT_NUMBER_LIST[1]
-            elif answer_port_bsp == "port":
-                TARGET_HOST_PORT = port
-        elif port is not None and bses is True:
-            answer_port_bses = get_answer\
-                ("\nYou specified too many options for the destination port (--port/-p AND --bses).\n"
-                 "Type port to continue with the value set by --port/-p option:[{0}].\n"
-                 "Type bses to continue with default value for bses[2322].".
-                 format(port), default="port/bses")
-            if answer_port_bses == "bses":
-                TARGET_HOST_PORT = PORT_NUMBER_LIST[0]
-            elif answer_port_bses == "port":
-                TARGET_HOST_PORT = port
-        elif port is not None:
-            TARGET_HOST_PORT = port
-        elif bsp is True:
-            TARGET_HOST_PORT = PORT_NUMBER_LIST[1]
-        elif bses is True:
-            TARGET_HOST_PORT = PORT_NUMBER_LIST[0]
-        return TARGET_HOST_PORT
-
-    b = get_target_host_port(args.port, args.bsp, args.bses)  # Control Line
-
-    def get_frequency(frequency):
-        POLLING_RATE = frequency
-        return POLLING_RATE
-
-    c = get_frequency(args.frequency)
-
-    def get_count(count):
-        POLLING_COUNT = count
-        return POLLING_COUNT
-
-    d = get_count(args.count)
-
-    def get_command(command):
-        COMMAND = command
-        return COMMAND
-
-    e = get_command(args.command)
+    elif ip is not None:
+        for i in ip:
+            TARGET_HOST_IP.append(i)
+    elif file is not None:
+        for i in file.readlines():
+            line_ip = i.rstrip()
+            TARGET_HOST_IP.append(line_ip)
+    return TARGET_HOST_IP
 
 
+def get_target_host_port(port, bsp, bses):  # Do a check on port/bsp/bses options and make the user pick only one.
+    if port is None and bsp is False and bses is False:
+        print("Please select at least one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
+        quit(print("Script failed..."))
+    elif bsp is True and bses is True:
+        answer_bsp_bses = get_answer\
+            ("\nYou specified too many options for the destination port (--bsp AND --bses).\n"
+             "Type bsp to continue with the value set by --bsp[2323]"
+             "Type bses to continue with the value set by --bses[2322]", default="bsp/bses")
+        if answer_bsp_bses == "bsp":
+            target_host_port = PORT_NUMBER_LIST[1]
+        elif answer_bsp_bses == "bses":
+            target_host_port = PORT_NUMBER_LIST[0]
+    elif port is not None and bsp is True and bses is True:
+        print("\nYou specified way too many options for the destination port (--port/-p AND --bsp AND --bses).\n"
+              "Please select only one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
+        quit(print("Script will now exit."))
+    elif port is not None and bsp is True:
+        answer_port_bsp = get_answer\
+            ("\nYou specified too many options for the destination port (--port/-p AND --bsp).\n"
+             "Type port to continue with the value set by --port/-p option:[{0}].\n"
+             "Type bsp to continue with the default value for bsp[2323].".
+             format(port), default="port/bsp")
+        if answer_port_bsp == "bsp":
+            target_host_port = PORT_NUMBER_LIST[1]
+        elif answer_port_bsp == "port":
+            target_host_port = port
+    elif port is not None and bses is True:
+        answer_port_bses = get_answer\
+            ("\nYou specified too many options for the destination port (--port/-p AND --bses).\n"
+             "Type port to continue with the value set by --port/-p option:[{0}].\n"
+             "Type bses to continue with default value for bses[2322].".
+             format(port), default="port/bses")
+        if answer_port_bses == "bses":
+            target_host_port = PORT_NUMBER_LIST[0]
+        elif answer_port_bses == "port":
+            target_host_port = port
+    elif port is not None:
+        target_host_port = port
+    elif bsp is True:
+        target_host_port = PORT_NUMBER_LIST[1]
+    elif bses is True:
+        target_host_port = PORT_NUMBER_LIST[0]
+    return target_host_port  # Not sure how to fix this.
 
-    def do_telnet(hosts, port, pollCount, pollRate, command):
-        for i in range(1, pollCount + 1):
-            for ip in hosts:
-                #try:
-                telnet = telnetlib.Telnet(ip, port)
+
+def get_frequency(frequency):
+    return frequency
+
+
+def get_count(count):
+    return count
+
+
+def get_command(command):
+    return command
+
+
+def run_telnet_connection(hosts, port, poll_rate, poll_count, command):
+    for pollNum in range(1, poll_count + 1):
+        for ip in hosts:
+            try:
+                telnet = telnetlib.Telnet(ip, port, timeout=2)
                 telnet.write((command + '\n').encode('UTF-8'))
                 telnet.close()
-                print("Command sent to %s" % ip)
-                #except:
-                    #print("Could not connect to host: %s" % ip)
-            if i < pollCount:
-                for item in range(1, int(pollRate) + 1):
-                    print(item, end=" ")
-                #print("Sleeping %d" % pollRate)
-                #time.sleep(pollRate)
-        return 0
+                print("#%s Command %s sent to %s" % (pollNum, command, ip))
+            except:
+                print("Could not connect to host: %s" % ip)
+        if pollNum < poll_count:
+            print("Sleeping for %s seconds" % poll_rate)
 
-    do_telnet(a, b, d, c, e)
+            time.sleep(poll_rate)
+    return 0
+
+run_telnet_connection(get_target_host_ip(args.ip, args.file),
+                      get_target_host_port(args.port, args.bsp, args.bses),
+                      get_frequency(args.frequency),
+                      get_count(args.count),
+                      get_command(args.command))

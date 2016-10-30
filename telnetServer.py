@@ -4,7 +4,7 @@ import logging
 import socket
 import select
 
-HOSTNAME = ''  # Local IP address. localhost/127.0.0.1 will Bind socket to local host and port, meaning you can only connect to telnet server form localhost.
+HOSTNAME = '0.0.0.0'  # Local IP address. localhost/127.0.0.1 will Bind socket to local host and port, meaning you can only connect to telnet server form localhost.
 PORT = '5555'
 
 MAXIMUM_QUEUED_CONNECTIONS = 5
