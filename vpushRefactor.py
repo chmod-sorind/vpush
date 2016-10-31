@@ -33,7 +33,7 @@ parser.add_argument('--bses', action='store_true', help='Push a poll on a BroadS
 parser.add_argument('--port', '-p', action='store', type=int, help="Specify a different port for the telnet connection (default: bsp[{1}], bses[{0}]).".format(PORT_NUMBER_LIST[0], PORT_NUMBER_LIST[1]))
 parser.add_argument('--ip', '-t', nargs='+', help='Specify one target IP or a list of IPs.')
 parser.add_argument('--file', '-f', action='store', type=argparse.FileType('r'), help='Specify a file that contains a list of IPs (one IP per row).')
-parser.add_argument('--frequency', '-fq', default=30, type=float, help='Specify the frequency of the poll in seconds. Default value is 60.')
+parser.add_argument('--frequency', '-fq', default=1, type=float, help='Specify the frequency of the poll in seconds. Default value is 1 sec.')
 parser.add_argument('--count', '-c', default=1, type=int, help='Specify the number of repetitions. Default value is 1.')
 parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + VERSION)
 args = parser.parse_args()
@@ -159,10 +159,10 @@ def run_telnet_connection(hosts, port, poll_rate, poll_count, command):
         if pollNum < poll_count:
             pollrate = int(poll_rate)
             print("Sleeping for {} seconds".format(pollrate))
-            while pollrate > -1:
-                mins, secs = divmod(int(pollrate), 60)
-                timeformat = '{:02d}:{:02d}'.format(mins, secs)
-                print(timeformat, end='\r')
+            while pollrate > 0:
+                minutes, sec = divmod(int(pollrate), 60)
+                countdown = '{:02d}:{:02d}'.format(minutes, sec)
+                print(countdown, end='\r')
                 time.sleep(1)
                 pollrate -= 1
     return 0
