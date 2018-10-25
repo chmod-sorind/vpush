@@ -3,6 +3,7 @@ import telnetlib
 import time
 import sys
 import requests
+from itertools import count
 
 PORT_NUMBER_LIST = (2322, 2323)
 TARGET_HOST_IP = []
@@ -28,13 +29,17 @@ Class implementation.
 
 '''
 
-
 # TODO Implement host CLASS
 
+
 class Host:
+    _ids = count(0)
+
     def __init__(self, ip, port):
         self.ip = ip
         self.port = port
+        self.id = next(self._ids)
+        print(self.id)
 
     def push(self):
         try:
@@ -43,8 +48,6 @@ class Host:
             telnet.close()
         except Exception as pollError:
             print("Host: {} {}".format(self.ip, pollError))
-
-
 
 
 parser = argparse.ArgumentParser(description='Send a command via telnet connection to BroadSign Player/Edge Server.')
@@ -239,6 +242,7 @@ if __name__ == '__main__':
             h = Host(i, get_target_host_port(args.port, args.bsp, args.bses))
             h.push()
             print("ip: {} port: {}".format(i, get_target_host_port(args.port, args.bsp, args.bses)))
+
     except KeyboardInterrupt:
         print("process interrupted by user...")
 
