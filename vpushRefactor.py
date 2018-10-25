@@ -35,7 +35,15 @@ class Host:
     def __init__(self, ip, port):
         self.ip = ip
         self.port = port
-        self.hostDestination = ip + ':' + port
+
+    def push(self):
+        try:
+            telnet = telnetlib.Telnet(self.ip, self.port, timeout=3)
+            telnet.write('vpush\n'.encode('UTF-8'))
+            telnet.close()
+        except Exception as pollError:
+            print("Host: {} {}".format(self.ip, pollError))
+
 
 
 
