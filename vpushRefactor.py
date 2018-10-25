@@ -49,7 +49,8 @@ class Host:
 
 parser = argparse.ArgumentParser(description='Send a command via telnet connection to BroadSign Player/Edge Server.')
 parser.add_argument('command', metavar='COMMAND', type=str, nargs='?', default='vpush',
-                    help='Command you want to send to the target IP via telnet connection. Default command is notorious vpush.')
+                    help='Command you want to send to the target IP via telnet connection.'
+                         'Default command is notorious vpush.')
 
 parser.add_argument('--bsp', action='store_true', help='Push a poll on a BroadSign Player on port 2323 by default.')
 parser.add_argument('--port', '-p', action='store', type=int,
@@ -97,11 +98,10 @@ def get_target_host_ip(ip, file):  # Do a check on ip/file options and make the 
         print("Please select at least one option for target ip (--ip/-t [IP] OR --file/-f [FILE])")
         quit(print("Script failed.."))
     elif file is not None and ip is not None:
-        answer_ip = get_answer \
-            ("You specified too many options for the target ip ( --ip AND --file).\n"
-             "Type file to continue targeting hosts specified in file[{0}].\n"
-             "Type ip to continue targeting hosts specified list by --ip/-t {1}".
-             format(file.name, ip), default="ip/file")
+        answer_ip = get_answer("You specified too many options for the target ip ( --ip AND --file).\n"
+                               "Type file to continue targeting hosts specified in file[{0}].\n"
+                               "Type ip to continue targeting hosts specified list by --ip/-t {1}".
+                               format(file.name, ip), default="ip/file")
         if answer_ip == "ip":
             for i in ip:
                 TARGET_HOST_IP.append(i)
@@ -203,42 +203,57 @@ def run_telnet_connection(hosts, port, poll_rate, poll_count, command):
     return 0
 
 
-def get_id(cont):
-    keyList = []
-    Id = []
-    url = "https://aws-qa-bsanode01.broadsign.net:10889/rest/host/v14/by_container"
-    querystring = {"container_id": cont}
-    headers = {
-        'Authorization': "Bearer " + bearer,
-        'Content-Type': "application/json"
-    }
-    response = requests.request("GET", url, headers=headers, params=querystring, verify=False)
-
-    for i in response.json()['host']:
-        if i['active'] == True:
-            Id.append(str(i['id']))
-
-    return (Id)
-
-
-def convert_ip(pid):
-    url = "https://aws-qa-bsanode01.broadsign.net:10889/rest/monitor_poll/v2/by_client_resource_id"
-    querystring = {"client_resource_id": str(pid)}
-    headers = {
-        'Authorization': "Bearer " + bearer,
-    }
-
-    response = requests.request("GET", url, headers=headers, params=querystring, verify=False)
-
-    return (response.json()['monitor_poll'][0]['private_ip'])
+# def get_id(cont):
+#     keyList = []
+#     Id = []
+#     url = "https://aws-qa-bsanode01.broadsign.net:10889/rest/host/v14/by_container"
+#     querystring = {"container_id": cont}
+#     headers = {
+#         'Authorization': "Bearer " + bearer,
+#         'Content-Type': "application/json"
+#     }
+#     response = requests.request("GET", url, headers=headers, params=querystring, verify=False)
+#
+#     for i in response.json()['host']:
+#         if i['active'] == True:
+#             Id.append(str(i['id']))
+#
+#     return (Id)
+#
+#
+# def convert_ip(pid):
+#     url = "https://aws-qa-bsanode01.broadsign.net:10889/rest/monitor_poll/v2/by_client_resource_id"
+#     querystring = {"client_resource_id": str(pid)}
+#     headers = {
+#         'Authorization': "Bearer " + bearer,
+#     }
+#
+#     response = requests.request("GET", url, headers=headers, params=querystring, verify=False)
+#
+#     return (response.json()['monitor_poll'][0]['private_ip'])
 
 
 if __name__ == '__main__':
     try:
-        run_telnet_connection(get_target_host_ip(args.ip, args.file),
-                              get_target_host_port(args.port, args.bsp, args.bses),
-                              get_frequency(args.frequency),
-                              get_count(args.count),
-                              get_command(args.command))
+        for i in get_target_host_ip(args.ip, args.file):
+            h = Host(i, get_target_host_port(args.port, args.bsp, args.bses))
+            h.push()
+            print("ip: {} port: {}".format(i, get_target_host_port(args.port, args.bsp, args.bses)))
     except KeyboardInterrupt:
         print("process interrupted by user...")
+
+# run_telnet_connection(get_target_host_ip(args.ip, args.file),
+# get_target_host_port(args.port, args.bsp, args.bses),
+# get_frequency(args.frequency),
+# get_count(args.count),
+# get_command(args.command))
+
+
+
+
+
+
+
+
+
+
