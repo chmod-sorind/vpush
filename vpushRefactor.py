@@ -9,45 +9,40 @@ PORT_NUMBER_LIST = (2322, 2323)
 TARGET_HOST_IP = []
 VERSION = "0.2.3"
 
-'''
-V 0.2.0
-Store the correct argument type for each option.
-Resolve conflicts when setting the TARGET_HOST_PORT port.
-Changed the way the argument for input files is set.
-Added a check for --file/-f.
-
-V 0.2.1
-Added a couple of ToDo points.
-Build the function get_answer to resolve conflicts between arguments.
-Build the function get_target_host_ip to get the target ip/ips from option --file/-f OR --ip/-t. Returns TARGET_HOST_IP.
-
-V 0.2.2
-Build get_target_host_port function to return TARGET_HOST_PORT. It should take 3 arguments (port, bsp, bses) which will use args.port, args.bsp and args.bses.
-
-V 0.2.3
-Class implementation.
-
-'''
-
 # TODO Implement host CLASS
 
 
 class Host:
     _ids = count(0)
 
-    def __init__(self, ip, port):
-        self.ip = ip
+    def __init__(self, ip_list, port):
+        self.ip_list = ip_list
         self.port = port
         self.id = next(self._ids)
         print(self.id)
 
-    def push(self):
+    def __del__(self):
+        print('Instance deleted.')
+
+    def get_ip_list_len(self, ip_list):
+        # return len
+        pass
+
+    def get_ip(self, ):
+        # return ip
+        pass
+
+    def set_port(self):
+        # return port
+        pass
+
+    def push(self, ip):
         try:
-            telnet = telnetlib.Telnet(self.ip, self.port, timeout=3)
+            telnet = telnetlib.Telnet(ip, self.port, timeout=3)
             telnet.write('vpush\n'.encode('UTF-8'))
             telnet.close()
         except Exception as pollError:
-            print("Host: {} {}".format(self.ip, pollError))
+            print("Host: {} {}".format(ip, pollError))
 
 
 parser = argparse.ArgumentParser(description='Send a command via telnet connection to BroadSign Player/Edge Server.')
@@ -91,9 +86,6 @@ def get_answer(question, default=""):
             print("\nSorry need an answer... Invalid answer for: '%s'" % default)
         elif choice in valid:
             return choice
-
-
-# First check if  all the necessary options were passed to the script or passed multiple times.
 
 
 def get_target_host_ip(ip, file):  # Do a check on ip/file options and make the user pick only one.
@@ -180,30 +172,30 @@ def get_command(command):
     return command
 
 
-def run_telnet_connection(hosts, port, poll_rate, poll_count, command):
-    for pollNum in range(1, poll_count + 1):
-        for ip in hosts:
-            try:
-                if '#' not in ip:
-                    telnet = telnetlib.Telnet(ip, port, timeout=3)
-                    telnet.write((command + '\n').encode('UTF-8'))
-                    telnet.close()
-                    print("#{0} Command {1} sent to {2}".format(pollNum, command, ip))
-                else:
-                    print('Skipping connection to: {}'.format(ip))
-            except Exception as e:
-                print("#{} ".format(pollNum), e, "Host: {}".format(ip))
-                # print("Could not connect to host: {}".format(ip))
-        if pollNum < poll_count:
-            pollrate = int(poll_rate)
-            print("Sleeping for {} seconds".format(pollrate))
-            while pollrate > 0:
-                minutes, sec = divmod(pollrate, 60)
-                countdown = '{:02d}:{:02d}'.format(minutes, sec)
-                print(countdown, end='\r')
-                time.sleep(1)
-                pollrate -= 1
-    return 0
+# def run_telnet_connection(hosts, port, poll_rate, poll_count, command):
+#     for pollNum in range(1, poll_count + 1):
+#         for ip in hosts:
+#             try:
+#                 if '#' not in ip:
+#                     telnet = telnetlib.Telnet(ip, port, timeout=3)
+#                     telnet.write((command + '\n').encode('UTF-8'))
+#                     telnet.close()
+#                     print("#{0} Command {1} sent to {2}".format(pollNum, command, ip))
+#                 else:
+#                     print('Skipping connection to: {}'.format(ip))
+#             except Exception as e:
+#                 print("#{} ".format(pollNum), e, "Host: {}".format(ip))
+#                 # print("Could not connect to host: {}".format(ip))
+#         if pollNum < poll_count:
+#             pollrate = int(poll_rate)
+#             print("Sleeping for {} seconds".format(pollrate))
+#             while pollrate > 0:
+#                 minutes, sec = divmod(pollrate, 60)
+#                 countdown = '{:02d}:{:02d}'.format(minutes, sec)
+#                 print(countdown, end='\r')
+#                 time.sleep(1)
+#                 pollrate -= 1
+#     return 0
 
 
 # def get_id(cont):
@@ -242,9 +234,10 @@ if __name__ == '__main__':
             h = Host(i, get_target_host_port(args.port, args.bsp, args.bses))
             h.push()
             print("ip: {} port: {}".format(i, get_target_host_port(args.port, args.bsp, args.bses)))
-
+            # del h
     except KeyboardInterrupt:
         print("process interrupted by user...")
+
 
 # run_telnet_connection(get_target_host_ip(args.ip, args.file),
 # get_target_host_port(args.port, args.bsp, args.bses),
