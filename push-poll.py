@@ -5,70 +5,72 @@ import sys
 import requests
 from itertools import count
 
-PORT_NUMBER_LIST = (2322, 2323)
+PORT_LIST = (2322, 2323)
 TARGET_HOST_IP = []
 VERSION = "0.2.3"
 
-'''
-V 0.2.0
-Store the correct argument type for each option.
-Resolve conflicts when setting the TARGET_HOST_PORT port.
-Changed the way the argument for input files is set.
-Added a check for --file/-f.
 
-V 0.2.1
-Added a couple of ToDo points.
-Build the function get_answer to resolve conflicts between arguments.
-Build the function get_target_host_ip to get the target ip/ips from option --file/-f OR --ip/-t. Returns TARGET_HOST_IP.
-
-V 0.2.2
-Build get_target_host_port function to return TARGET_HOST_PORT. It should take 3 arguments (port, bsp, bses) which will use args.port, args.bsp and args.bses.
-
-V 0.2.3
-Class implementation.
-
-'''
-
-# ToDo Implement host CLASS
+# TODO Implement host CLASS
 # ToDo Make vpush a variable called command that can be changed. push or vpush could be used.
 # ToDo Clean-up unnecessary script arguments
+# ToDO Implement *args and *kwargs
+
 
 class Host:
     _ids = count(0)
 
-    def __init__(self, ip, port):
-        self.ip = ip
+    def __init__(self, ip_list, port):
+        self.ip_list = ip_list
         self.port = port
         self.id = next(self._ids)
+        print(self.id)
 
-    def push(self):
+    def __del__(self):
+        print('Instance deleted.')
+
+    @staticmethod
+    def get_ip_list_len(ip_list):
+        """Returns the length of a list containing all the target hosts"""
+        return len(ip_list)
+
+    @staticmethod
+    def get_ip(ip_list, position):
+        return ip_list[position]
+
+    # Is this even necessary
+    @staticmethod
+    def set_port(port='2323'):
+        return port
+
+    def push(self, ip):
         try:
-            telnet = telnetlib.Telnet(self.ip, self.port, timeout=3)
+            telnet = telnetlib.Telnet(ip, self.port, timeout=3)
             telnet.write('vpush\n'.encode('UTF-8'))
             telnet.close()
-            print("# {0} Command sent to Host: {1}:{2}".format(self.id, self.ip, self.port))
+            print("# {0} Command sent to Host: {1}:{2}".format(self.id, ip, self.port))
         except Exception as telnetError:
-            print("Host: {0} {1}".format(self.ip, telnetError))
+            print("Host: {0} {1}".format(ip, telnetError))
 
 
 parser = argparse.ArgumentParser(description='Send a command via telnet connection to BroadSign Player/Edge Server.')
+parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + VERSION)
 
-parser.add_argument('--bsp', action='store_true', help='Push a poll on a BroadSign Player on port 2323 by default.')
-parser.add_argument('--port', '-p', action='store', type=int,
-                    help="Specify a different port for the telnet connection (default: bsp[{1}], bses[{0}]).".format(
-                        PORT_NUMBER_LIST[0], PORT_NUMBER_LIST[1]))
-
+parser.add_argument('--bsp', action='store_true',
+                    help='Push a poll on a BroadSign Player on port 2323 by default.')
 parser.add_argument('--bses', action='store_true',
                     help='Push a poll on a BroadSign Edge Server on port 2324 by default.')
-
-parser.add_argument('--ip', '-t', nargs='+', help='Specify one target IP or a list of IPs.')
+parser.add_argument('--port', '-p', action='store', type=int,
+                    help="Specify a different port for the telnet connection (default: bsp[{1}], bses[{0}])."
+                         "".format(PORT_LIST[0], PORT_LIST[1]))
+parser.add_argument('--ip', '-t', nargs='+',
+                    help='Specify one target IP or a list of IPs.')
 parser.add_argument('--file', '-f', action='store', type=argparse.FileType('r'),
                     help='Specify a file that contains a list of IPs (one IP per row).')
 
 parser.add_argument('--frequency', '-fq', default=1, type=float,
                     help='Specify the frequency of the poll in seconds. Default value is 1 sec.')
-parser.add_argument('--count', '-c', default=1, type=int, help='Specify the number of repetitions. Default value is 1.')
-parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + VERSION)
+parser.add_argument('--count', '-c', default=1, type=int,
+                    help='Specify the number of repetitions. Default value is 1.')
 args = parser.parse_args()
 
 
@@ -89,9 +91,6 @@ def get_answer(question, default=""):
             print("\nSorry need an answer... Invalid answer for: '%s'" % default)
         elif choice in valid:
             return choice
-
-
-# First check if  all the necessary options were passed to the script or passed multiple times.
 
 
 def get_target_host_ip(ip, file):  # Do a check on ip/file options and make the user pick only one.
@@ -130,9 +129,9 @@ def get_target_host_port(port, bsp, bses):  # Do a check on port/bsp/bses option
              "Type bsp to continue with the value set by --bsp[2323]"
              "Type bses to continue with the value set by --bses[2322]", default="bsp/bses")
         if answer_bsp_bses == "bsp":
-            target_host_port = PORT_NUMBER_LIST[1]
+            target_host_port = PORT_LIST[1]
         elif answer_bsp_bses == "bses":
-            target_host_port = PORT_NUMBER_LIST[0]
+            target_host_port = PORT_LIST[0]
     elif port is not None and bsp is True and bses is True:
         print("\nYou specified way too many options for the destination port (--port/-p AND --bsp AND --bses).\n"
               "Please select only one option for target port (--port/-p [PORT] OR --bsp OR --bses)")
@@ -144,7 +143,7 @@ def get_target_host_port(port, bsp, bses):  # Do a check on port/bsp/bses option
              "Type bsp to continue with the default value for bsp[2323].".
              format(port), default="port/bsp")
         if answer_port_bsp == "bsp":
-            target_host_port = PORT_NUMBER_LIST[1]
+            target_host_port = PORT_LIST[1]
         elif answer_port_bsp == "port":
             target_host_port = port
     elif port is not None and bses is True:
@@ -154,15 +153,15 @@ def get_target_host_port(port, bsp, bses):  # Do a check on port/bsp/bses option
              "Type bses to continue with default value for bses[2322].".
              format(port), default="port/bses")
         if answer_port_bses == "bses":
-            target_host_port = PORT_NUMBER_LIST[0]
+            target_host_port = PORT_LIST[0]
         elif answer_port_bses == "port":
             target_host_port = port
     elif port is not None:
         target_host_port = port
     elif bsp is True:
-        target_host_port = PORT_NUMBER_LIST[1]
+        target_host_port = PORT_LIST[1]
     elif bses is True:
-        target_host_port = PORT_NUMBER_LIST[0]
+        target_host_port = PORT_LIST[0]
     return target_host_port  # Not sure how to fix this Message: "Local Variable (#) might be referenced before assignment.".
 
 
@@ -173,10 +172,10 @@ def get_frequency(frequency):
 def get_count(count):
     return count
 
+
 ## DEPRECATED for now maybe use this later to determine weter is a regular or a forced poll
 # def get_command(command):
 #     return command
-
 ## DEPRECATED.
 # def run_telnet_connection(hosts, port, poll_rate, poll_count, command):
 #     for pollNum in range(1, poll_count + 1):
@@ -239,6 +238,7 @@ if __name__ == '__main__':
         for i in get_target_host_ip(args.ip, args.file):
             h = Host(i, get_target_host_port(args.port, args.bsp, args.bses))
             h.push()
+            print("ip: {} port: {}".format(i, get_target_host_port(args.port, args.bsp, args.bses)))
     except KeyboardInterrupt:
         print("process interrupted by user...")
 
@@ -248,13 +248,3 @@ if __name__ == '__main__':
 # get_frequency(args.frequency),
 # get_count(args.count),
 # get_command(args.command))
-
-
-
-
-
-
-
-
-
-
