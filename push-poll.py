@@ -16,17 +16,18 @@ VERSION = "0.2.3"
 # ToDO Implement *args and *kwargs
 
 
-class Host:
-    _ids = count(0)
+class Host():
+    id = 0
 
-    def __init__(self, ip_list, port):
-        self.ip_list = ip_list
+    def __init__(self, port):
+        # self.ip_list = ip_list
         self.port = port
-        self.id = next(self._ids)
-        print(self.id)
+        self.id +=1
+        # print(self.id)
 
     def __del__(self):
-        print('Instance deleted.')
+        self.id -= 1
+        # print(self.id)
 
     @staticmethod
     def get_ip_list_len(ip_list):
@@ -47,7 +48,7 @@ class Host:
             telnet = telnetlib.Telnet(ip, self.port, timeout=3)
             telnet.write('vpush\n'.encode('UTF-8'))
             telnet.close()
-            print("# {0} Command sent to Host: {1}:{2}".format(self.id, ip, self.port))
+            print("Command sent to Host: {}:{}".format(ip, self.port))
         except Exception as telnetError:
             print("Host: {0} {1}".format(ip, telnetError))
 
@@ -234,11 +235,16 @@ def get_count(count):
 
 
 if __name__ == '__main__':
+
+    try:
+        port = get_target_host_port(args.port, args.bsp, args.bses)
+    except Exception as e:
+        print(e)
+
     try:
         for i in get_target_host_ip(args.ip, args.file):
-            h = Host(i, get_target_host_port(args.port, args.bsp, args.bses))
-            h.push()
-            print("ip: {} port: {}".format(i, get_target_host_port(args.port, args.bsp, args.bses)))
+            player = Host(port)
+            player.push(i)
     except KeyboardInterrupt:
         print("process interrupted by user...")
 
