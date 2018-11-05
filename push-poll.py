@@ -1,9 +1,7 @@
 import argparse
 import telnetlib
-import time
 import sys
 import requests
-from itertools import count
 
 PORT_LIST = (2322, 2323)
 TARGET_HOST_IP = []
@@ -16,18 +14,15 @@ VERSION = "0.2.3"
 # ToDO Implement *args and *kwargs
 
 
-class Host():
+class Host:
     id = 0
 
-    def __init__(self, port):
-        # self.ip_list = ip_list
-        self.port = port
-        self.id +=1
-        # print(self.id)
+    def __init__(self, p):
+        self.p = p
+        self.id += 1
 
     def __del__(self):
         self.id -= 1
-        # print(self.id)
 
     @staticmethod
     def get_ip_list_len(ip_list):
@@ -40,15 +35,15 @@ class Host():
 
     # Is this even necessary
     @staticmethod
-    def set_port(port='2323'):
-        return port
+    def set_port(p='2323'):
+        return p
 
     def push(self, ip):
         try:
-            telnet = telnetlib.Telnet(ip, self.port, timeout=3)
+            telnet = telnetlib.Telnet(ip, self.p, timeout=3)
             telnet.write('vpush\n'.encode('UTF-8'))
             telnet.close()
-            print("Command sent to Host: {}:{}".format(ip, self.port))
+            print("Command sent to Host: {}:{}".format(ip, self.p))
         except Exception as telnetError:
             print("Host: {0} {1}".format(ip, telnetError))
 
